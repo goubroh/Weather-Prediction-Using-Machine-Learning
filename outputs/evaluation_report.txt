@@ -1,0 +1,11 @@
+              precision    recall  f1-score   support
+
+     drizzle       0.50      0.11      0.18         9
+         fog       0.57      0.16      0.25        25
+        rain       0.95      0.93      0.94       120
+        snow       0.67      0.25      0.36         8
+         sun       0.77      0.97      0.86       131
+
+    accuracy                           0.84       293
+   macro avg       0.69      0.48      0.52       293
+weighted avg       0.82      0.84      0.81       293
