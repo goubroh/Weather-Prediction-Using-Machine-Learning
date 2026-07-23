@@ -1,3 +1,4 @@
+import os
 import joblib
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,7 +10,7 @@ from data_preprocessing import load_and_preprocess_data
 
 def evaluate_all_models():
     # 1. Load data and saved models
-    _, X_test, _, y_test = load_and_preprocess_data()
+    _, X_test, _, y_test = load_and_preprocess_data(save_scaler=False)
     models = joblib.load("models/trained_models.joblib")
 
     results = {}
@@ -18,11 +19,12 @@ def evaluate_all_models():
     for name, model in models.items():
         y_pred = model.predict(X_test)
         
-        # Check for probability prediction capability (used for ROC AUC)
         if hasattr(model, 'predict_proba'):
             y_prob = model.predict_proba(X_test)[:, 1]
-        else:
+        elif hasattr(model, 'decision_function'):
             y_prob = model.decision_function(X_test)
+        else:
+            y_prob = None
 
         results[name] = {
             'accuracy': accuracy_score(y_test, y_pred),
@@ -51,27 +53,36 @@ def evaluate_all_models():
     print("\n================ Model Comparative Performance Summary ================")
     print(summary_df.to_string(index=False))
 
-    # 4. Save results table to outputs/logs/
-    csv_out_path = "outputs/logs/model_comparison_results.csv"
+    # 4. Save CSV results
+    log_dir = "outputs/logs"
+    os.makedirs(log_dir, exist_ok=True)
+    csv_out_path = os.path.join(log_dir, "model_comparison_results.csv")
     summary_df.to_csv(csv_out_path, index=False)
     print(f"\nSummary table saved to {csv_out_path}")
 
-    # 5. Plot and save ROC Curves to outputs/plots/
-    plt.figure(figsize=(9, 6))
+    # 5. Plot ROC Curves (Resized popup figure)
+    plot_dir = "outputs/plots"
+    os.makedirs(plot_dir, exist_ok=True)
+    
+    # Compact figure size for comfortable desktop display window
+    plt.figure(figsize=(7.5, 5))
+    
     for model_name, metrics in results.items():
         fpr, tpr, _ = metrics['fpr_tpr']
         if fpr is not None and tpr is not None:
             plt.plot(fpr, tpr, label=f'{model_name} (AUC = {metrics["roc_auc"]:.4f})')
 
-    plt.plot([0, 1], [0, 1], linestyle='--', color='gray')
-    plt.title('ROC Curves - Seattle Weather Prediction Models')
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.legend(loc='lower right')
-    plt.grid(True)
+    plt.plot([0, 1], [0, 1], linestyle='--', color='gray', label='Baseline (AUC = 0.50)')
+    plt.title('ROC Curves - Seattle Weather Prediction Models', fontsize=11, fontweight='bold')
+    plt.xlabel('False Positive Rate', fontsize=9.5)
+    plt.ylabel('True Positive Rate', fontsize=9.5)
+    plt.legend(loc='lower right', fontsize=8.5)
+    plt.grid(True, linestyle=':', alpha=0.6)
+    plt.tight_layout()
 
-    plot_out_path = "outputs/plots/roc_curves.png"
-    plt.savefig(plot_out_path)
+    # Save high-res image to disk, keep screen popup compact
+    plot_out_path = os.path.join(plot_dir, "roc_curves.png")
+    plt.savefig(plot_out_path, dpi=300)
     print(f"ROC plot saved to {plot_out_path}")
     plt.show()
 
