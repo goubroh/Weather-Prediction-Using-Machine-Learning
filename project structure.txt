@@ -1,0 +1,25 @@
+Weather Prediction Using Machine Learning...
+│
+├── data/
+│   ├── raw/
+│   │   └── seattle-weather.csv       # Raw weather dataset
+│   └── processed/                    # Preprocessed/engineered datasets
+│
+├── src/
+│   ├── data_preprocessing.py         # Lag features, cyclical encoding, scaling
+│   ├── train.py                      # Multi-model training and artifact export
+│   ├── evaluate.py                   # Performance evaluation & ROC visualization
+│   └── predict_and_compare.py        # Real-time inference & side-by-side model predictions
+│
+├── models/                           # Serialized model artifacts (.joblib)
+│   ├── scaler.joblib
+│   └── trained_models.joblib
+│
+├── outputs/                          # Saved metrics, comparative tables, & plots
+│   ├── logs/
+│   │   └── model_comparison_results.csv
+│   └── plots/
+│       └── roc_curves.png
+│
+├── requirements.txt                  # Project dependencies
+└── README.md                         # Documentation
